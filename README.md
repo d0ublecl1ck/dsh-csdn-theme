@@ -2,6 +2,7 @@
 
 > 把 CSDN 博文的正文排版搬进 DeepSeek Harness 网页端 —— 标题层级、引用块、表格、行内代码、代码块一次对齐，浅色深色各一套。
 
+[![npm](https://img.shields.io/npm/v/dsh-csdn-theme)](https://www.npmjs.com/package/dsh-csdn-theme)
 [![license](https://img.shields.io/github/license/d0ublecl1ck/dsh-csdn-theme)](LICENSE)
 [![stars](https://img.shields.io/github/stars/d0ublecl1ck/dsh-csdn-theme?style=flat)](https://github.com/d0ublecl1ck/dsh-csdn-theme)
 ![dsh](https://img.shields.io/badge/dsh-0.1.7--rc.2-6f42c1)
@@ -35,6 +36,12 @@
 | 代码 | 行内代码 `#c7254e` on `#f9f2f4`、代码块圆角与底色、Atom One Light / Dark 语法高亮 |
 
 ## 快速开始
+
+从 npm 装：
+
+```sh
+dsh plugin --profile web add dsh-csdn-theme
+```
 
 从 GitHub 装：
 

@@ -31,10 +31,23 @@ dsh plugin --profile web remove dsh-csdn-theme
 - 样式表作用域 `[class*="_markdown_"]:not([class*="_compact_"])`；代码块用宿主全局钩子 `md-code-block`。
 - 视觉取值都要有来源：颜色取自 CSDN 线上样式表，排版取自博文页的计算样式或样式表，不凭印象写。
 
+## 发布到 npm
+
+包名 `dsh-csdn-theme`，2026-10-03 首次发布 `0.2.0`。发布源固定在 `package.json` 的 `publishConfig.registry`（npmjs.org）—— 本机默认 registry 是 npmmirror 镜像，所以不要手动加 `--registry`。
+
+```sh
+npm publish          # 发新版前先改 package.json 里的 version
+```
+
+账号只绑了**通行密钥**（没有 TOTP App），命令行拿不到 6 位码，所以现在靠 `~/.npmrc` 里一条 **granular token + bypass 2FA** 发布（该 token 有效期到 2027-01-01）。
+
+**这条路有截止时间**：npm 从 **2027 年 1 月**起禁止绕过 2FA 的 token 直接发布。到期前必须迁到 GitHub Actions 的 trusted publishing（OIDC），否则会重新卡在 `EOTP` —— 换普通 granular token 也一样不行。
+
 ## 当前状态与下一步
 
 - 单测 7/7；五道门（manifest / shape / install / compose / activate）全过；样式表在真实浏览器中 36/36 规则解析通过。
 - 已在 DSH Desktop（dsh `0.1.7-rc.2`）实测两层都生效：`body` 上有 token 内联覆盖，DOM 里有 `<style data-plugin="dsh-csdn-theme">`；浅色品牌色 `#fc5531`、深色 `#ff6f4d`。真实截图在 `assets/`，重录方式见 `scripts/capture-screenshots.mjs` 头部注释。
+- 已发布 npm：`dsh-csdn-theme@0.2.0`（2026-10-03），`repository` 指回本仓库，目录侧的 npm 映射会自动关联，无需手动申报。
 - 已公开：`github.com/d0ublecl1ck/dsh-csdn-theme`；市场收录已提 PR（`awesome-dsh-plugin/awesome-dsh-plugin#6474`，`category: theme`），等对方 CI 的仓库年龄门自动放行，无需重提。
 - `u` / `kbd` 规则在 DSH 对话里不会触发——DSH 的 Markdown 渲染器转义原始 HTML；保留是为了其他会产出真实元素的场景。
 - 未覆盖：`<mark>`、任务列表复选框、KaTeX；h5/h6 没有独立 token，只对齐了外边距。

@@ -8,3 +8,5 @@
 - [ ] 市场收录依赖仓库年龄 — awesome-dsh-plugin 的 CI 会读 GitHub 仓库 `created_at`，要求满 1 天；刚建好的仓库提 PR 必被拒。记录：2026-10-03
 - [ ] 截图展示走仓库根目录的 `screenshots.json` — 市场详情页读它（或从 README 自动抽图）。换截图时同步这个文件，不要在目录仓库里另加键。记录：2026-10-03
 - [ ] 重录截图会把实例的 `ui-theme.preference` 临时改成 `dark` — 这是实时设置，会同时影响用户正在看的界面；截完必须改回原值。记录：2026-10-03
+- [ ] 发布 npm 依赖一条 bypass 2FA 的 granular token（在 `~/.npmrc`，2027-01-01 过期）— npm 从 2027 年 1 月起禁止绕过 2FA 的 token 直接发布；到期前必须迁到 trusted publishing，否则会重新卡在 EOTP。记录：2026-10-03
+- [ ] npm 账号只绑了通行密钥、没有 TOTP App — 命令行产不出 6 位码，任何需要 `--otp` 的路径都走不通；要长期发版就得加一个验证器 App 或改用 OIDC。记录：2026-10-03
