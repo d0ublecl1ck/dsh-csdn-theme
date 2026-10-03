@@ -136,6 +136,7 @@ Markdown 根类在构建产物里形如 `_markdown_1ypvv_5`，样式表用 `[cla
 | `client.js` | 调色板、字体 token、语法高亮 token、元素级样式表 |
 | `screenshots.json` | 声明市场详情页要展示的截图 |
 | `assets/` | 上面两张真实截图 |
+| `scripts/capture-screenshots.mjs` | 重录那两张截图的完整链路 |
 | `test/client.test.mjs` | 7 条单测：模块契约、token 形状与命名空间、字号轴、高亮取值、样式表注入与清理 |
 
 ## 本地验证
@@ -146,18 +147,23 @@ npm test
 
 ## 怎么重录这两张截图
 
-截图走的是「固定提示词 → 真实 DSH 会话 → 无头浏览器截取正文区域」，没有做任何图像处理或后期拼图：
+截图走的是「固定提示词 → 真实 DSH 会话 → 无头浏览器截取正文区域」，没有做任何图像处理或后期拼图。整条链路是仓库里的 [`scripts/capture-screenshots.mjs`](scripts/capture-screenshots.mjs)：
 
-1. 起一个本地 DSH 实例，把本插件装进它使用的 profile（本机为 DSH Desktop，dsh `0.1.7-rc.2`）。
-2. 在该实例里新建一个会话，把下面这段提示词原样发给它，等这一轮跑完：
+```sh
+DSH_HOME="<实例 home>" node scripts/capture-screenshots.mjs
+```
 
-   ```text
+前置：该实例已装好本插件；本机有 Chrome 与 Node 18+（脚本用内置的 `fetch` 和 `WebSocket`，不装依赖）。
+
+脚本会依次做四件事：在本仓库对应的工作区里开一个示例会话；把下面这段提示词发给它并等这一轮跑完；用无头 Chrome 打开该实例的 GUI、展开工作区、点开该会话，按正文区域截图（浅色一张；把 `ui-theme.preference` 临时切成 `dark` 再截一张，截完立即改回原值）；归档这个示例会话。
+
+用的提示词：
+
+```text
 写一段 CSDN 风格的技术博文正文，约 450 字，主题自拟（围绕「用 CSS 变量做主题覆盖」）。直接输出 Markdown 正文本身：不要开场白、不要解释、不要用代码围栏把整篇包起来。正文必须自然出现：一个二级标题、两个三级标题、加粗、斜体、删除线、行内代码、引用块、三列表格（带表头）、无序列表、一个 JavaScript 代码块、一条分隔线、一个链接。绝对不要输出任何 HTML 标签（不要 <u>、<kbd> 之类）。不要调用任何工具。
-   ```
+```
 
-3. 用无头 Chrome 打开该实例的 GUI，展开对应工作区、点开这个会话，截取正文区域得到浅色图。
-4. 把设置里的 `ui-theme.preference` 切成 `dark`，同一位置再截一张深色图，截完改回原值。
-5. 覆盖 `assets/screenshot-light.png` 与 `assets/screenshot-dark.png`（宽度 1432px 足够），`screenshots.json` 无需改动。
+产物直接覆盖 `assets/screenshot-light.png` 与 `assets/screenshot-dark.png`（1432px 宽），`screenshots.json` 无需改动。加 `--keep` 可以保留示例会话。
 
 ## 想改
 

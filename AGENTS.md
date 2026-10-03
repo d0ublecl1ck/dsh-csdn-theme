@@ -25,6 +25,7 @@ dsh plugin --profile web remove dsh-csdn-theme
 - `client.js` — 唯一实现：调色板、token 表、元素级样式表。
 - `test/client.test.mjs` — 全部单测；改行为先在这里加断言。
 - `cordis.patch.yml` — 往 profile 插入行 `csdn-theme`。
+- `scripts/capture-screenshots.mjs` — 重录 README 两张截图的链路；跑它会在实例里开一个示例会话并归档，中途会临时改 `ui-theme.preference` 再改回。
 - token 命名空间：宿主语义层 `--dsw-`，语法高亮 `--shiki-`，本插件私有 `--csdn-`。
 - 字号不写死 px，一律按比例挂在 `--dsh-content-font-size` 上，保留宿主字号设置。
 - 样式表作用域 `[class*="_markdown_"]:not([class*="_compact_"])`；代码块用宿主全局钩子 `md-code-block`。
