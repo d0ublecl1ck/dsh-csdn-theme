@@ -35,7 +35,7 @@ dsh plugin --profile web remove dsh-csdn-theme
 
 - 单测 7/7；五道门（manifest / shape / install / compose / activate）全过；样式表在真实浏览器中 36/36 规则解析通过。
 - 已在 DSH Desktop（dsh `0.1.7-rc.2`）实测两层都生效：`body` 上有 token 内联覆盖，DOM 里有 `<style data-plugin="dsh-csdn-theme">`；浅色品牌色 `#fc5531`、深色 `#ff6f4d`。真实截图在 `assets/`，重录方式见 `scripts/capture-screenshots.mjs` 头部注释。
-- 已公开：`github.com/d0ublecl1ck/dsh-csdn-theme`；市场收录走 `awesome-dsh-plugin` 目录的 `category: theme` 条目。
+- 已公开：`github.com/d0ublecl1ck/dsh-csdn-theme`；市场收录已提 PR（`awesome-dsh-plugin/awesome-dsh-plugin#6474`，`category: theme`），等对方 CI 的仓库年龄门自动放行，无需重提。
 - `u` / `kbd` 规则在 DSH 对话里不会触发——DSH 的 Markdown 渲染器转义原始 HTML；保留是为了其他会产出真实元素的场景。
 - 未覆盖：`<mark>`、任务列表复选框、KaTeX；h5/h6 没有独立 token，只对齐了外边距。
 - 未验证：早于 0.1.7 的 DSH 版本。
