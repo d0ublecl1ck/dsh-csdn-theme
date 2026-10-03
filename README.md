@@ -67,19 +67,6 @@ dsh plugin --profile web remove dsh-csdn-theme
 
 还可在浏览器控制台执行 `document.querySelector('style[data-plugin="dsh-csdn-theme"]')`，返回该元素即表示样式层已注入。
 
-## 它和同类有什么不同？
-
-社区目录里 `theme` 分类有 150 多条，绝大多数是整屏换肤（壁纸、粒子、玻璃质感、成套色板）。本插件的差异是**正文排版**：
-
-| | 本插件 | 常见换肤主题 |
-| --- | --- | --- |
-| 目标 | 复刻一个真实站点的**正文阅读体验** | 换掉外壳配色或壁纸 |
-| 取值来源 | CSDN 线上样式表出现频次统计 + 博文页计算样式，逐条记录在下面 | 多为自拟色板 |
-| 字号 | 按比例挂在 `--dsh-content-font-size`，跟随宿主的字号设置 | 常写死 px |
-| 深色 | 同一套语义推导，不是机械反转 | 视实现而定 |
-
-改 Markdown 阅读体验的同类还有 [dsh-markdown-xyy](https://github.com/mengnanxyyyy/dsh-markdown-xyy)（只改正文、不动基线主题）与 [dsh-theme-newsprint](https://github.com/2745LM/dsh-theme-newsprint)（移植 Typora newsprint 的衬线排版），可以对比着挑。
-
 ## 取值来源（2026-10-03 实测）
 
 配色取自 csdn.net 线上样式表 `csdnimg.cn/release/cmsfe/public/css/common.7303c5f0.css` 的出现频次统计：品牌色 `#fc5531` 出现 151 次，另有 `#222226` / `#555666` / `#999aaa` / `#ccccd8` 文字阶、`#e8e8ed` / `#f0f0f5` 边框阶、`#f5f6f7` 页面底色。
@@ -144,26 +131,6 @@ Markdown 根类在构建产物里形如 `_markdown_1ypvv_5`，样式表用 `[cla
 ```sh
 npm test
 ```
-
-## 怎么重录这两张截图
-
-截图走的是「固定提示词 → 真实 DSH 会话 → 无头浏览器截取正文区域」，没有做任何图像处理或后期拼图。整条链路是仓库里的 [`scripts/capture-screenshots.mjs`](scripts/capture-screenshots.mjs)：
-
-```sh
-DSH_HOME="<实例 home>" node scripts/capture-screenshots.mjs
-```
-
-前置：该实例已装好本插件；本机有 Chrome 与 Node 18+（脚本用内置的 `fetch` 和 `WebSocket`，不装依赖）。
-
-脚本会依次做四件事：在本仓库对应的工作区里开一个示例会话；把下面这段提示词发给它并等这一轮跑完；用无头 Chrome 打开该实例的 GUI、展开工作区、点开该会话，按正文区域截图（浅色一张；把 `ui-theme.preference` 临时切成 `dark` 再截一张，截完立即改回原值）；归档这个示例会话。
-
-用的提示词：
-
-```text
-写一段 CSDN 风格的技术博文正文，约 450 字，主题自拟（围绕「用 CSS 变量做主题覆盖」）。直接输出 Markdown 正文本身：不要开场白、不要解释、不要用代码围栏把整篇包起来。正文必须自然出现：一个二级标题、两个三级标题、加粗、斜体、删除线、行内代码、引用块、三列表格（带表头）、无序列表、一个 JavaScript 代码块、一条分隔线、一个链接。绝对不要输出任何 HTML 标签（不要 <u>、<kbd> 之类）。不要调用任何工具。
-```
-
-产物直接覆盖 `assets/screenshot-light.png` 与 `assets/screenshot-dark.png`（1432px 宽），`screenshots.json` 无需改动。加 `--keep` 可以保留示例会话。
 
 ## 想改
 
