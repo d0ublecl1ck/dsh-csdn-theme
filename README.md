@@ -94,3 +94,4 @@ dsh plugin --profile web remove dsh-csdn-theme
 - 只做视觉覆盖，不改 DOM、不注册设置项；开关就是启用/停用这个插件。
 - `compact` 变体不覆盖，避免影响工具输出这类小字号区域。
 - 深色侧不是 CSDN 官方换肤（站点未公开深色 token），是按同一套语义调出的深色值。
+- h5/h6 在 DSH 里没有独立的 `--dsw-font-markdown-*` token：本插件只对齐了它们的外边距与颜色，表里那两个尺寸是 CSDN 实测值，未逐像素复刻。
