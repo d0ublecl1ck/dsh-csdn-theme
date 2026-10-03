@@ -5,6 +5,18 @@
   "type": "module",
   "license": "MIT",
   "description": "CSDN 风格的 DSH Web 主题：CSDN 品牌色与博文正文排版（加粗/下划线/引用/表格/代码等）双层接入，浅色与深色各一套。",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "theme",
+    "csdn",
+    "markdown"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d0ublecl1ck/dsh-csdn-theme.git"
+  },
+  "homepage": "https://github.com/d0ublecl1ck/dsh-csdn-theme#readme",
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
