@@ -1,52 +1,69 @@
 # dsh-csdn-theme
 
-CSDN 风格的 DeepSeek Harness Web 主题。把 CSDN 的品牌色与文字/边框/代码色阶，通过主题
-token 覆盖层接入 DSH 网页端，浅色与深色各一套。
+CSDN 风格的 DeepSeek Harness Web 主题。把 CSDN 博文页面的配色与正文排版接进 DSH 网页端，
+浅色与深色各一套。
 
 ## 它做什么
 
-DSH 客户端有一个 `theme` 服务，任何客户端插件都能用
-`ctx.theme.overrideTokens(source, tokens)` 往当前主题上叠一层 token 覆盖。本插件只做这一件事：
+分两层，都由 `client.js` 在客户端完成，宿主半边是空的：
 
-- `source` 固定为包名 `dsh-csdn-theme`，一个插件一层，卸载即整层撤销；
-- 每个 token 都给 `{ light, dark }` 两个值，宿主按当前配色方案取用；
-- 覆盖的是语义层 `--dsw-alias-*`，所以亮/暗切换、以及其它插件依赖同一批 token 的地方都会跟着变。
+1. **token 覆盖层** —— `ctx.theme.overrideTokens('dsh-csdn-theme', TOKENS)`
+   往当前主题叠一层语义覆盖，每个 token 都给 `{ light, dark }` 两个值。覆盖范围包括
+   品牌/文字/边框/底色等 `--dsw-alias-*`、Markdown 排版 `--dsw-font-markdown-*`、
+   代码高亮 `--shiki-*`，以及本插件私有的 `--csdn-*`（供第 2 层的样式表取色）。
+2. **Markdown 样式表层** —— 追加一个 `<style data-plugin="dsh-csdn-theme">`
+   补 token 表达不了的东西：加粗字重、下划线、删除线、链接悬停、引用块左粗边与灰底、
+   表格实线网格与斑马纹、分隔线、行内代码、`kbd`、图注、列表缩进等。
 
-它不改页面结构、不注入额外样式表、不注册设置项，开关就是启用/停用这个插件。
+两层都是可撤销的：`ctx.effect` 注册的 disposer 分别移除 token 层与 style 标签；
+停用插件即整层还原。
 
-## 调色板从哪来
+## 取值来源（2026-10-03 实测）
 
-浅色侧取自 csdn.net 线上样式表
-`csdnimg.cn/release/cmsfe/public/css/common.7303c5f0.css` 里出现频次最高的颜色：
+配色取自 csdn.net 线上样式表 `csdnimg.cn/release/cmsfe/public/css/common.7303c5f0.css`
+的出现频次统计：品牌色 `#fc5531` 出现 151 次，另有 `#222226` / `#555666` / `#999aaa` /
+`#ccccd8` 文字阶、`#e8e8ed` / `#f0f0f5` 边框阶、`#f5f6f7` 页面底色。
 
-| 用途 | 值 | 来源 |
-| --- | --- | --- |
-| 品牌主色 | `#fc5531` | 该文件出现 151 次，用于主按钮、链接悬停、选中态 |
-| 品牌悬停 | `#e9655c` | 主按钮 hover |
-| 品牌按下 | `#cc382e` | 主按钮 active |
-| 正文 | `#222226` | 出现 46 次 |
-| 次要文字 | `#555666` | 出现 59 次 |
-| 弱化文字 | `#999aaa` | 出现 61 次 |
-| 禁用/占位 | `#ccccd8` | 出现 136 次 |
-| 分隔线 | `#e8e8ed` | 出现 61 次 |
-| 浅色分隔 | `#f0f0f5` | 出现 21 次 |
-| 页面底色 | `#f5f6f7` | 出现 25 次 |
-| 代码底色 | `#f7f7fc` | 出现 15 次 |
-| 链接 | `#277ccc` | 出现 32 次 |
-| 成功/警告/危险/信息 | `#67c23a` / `#e6a23c` / `#f56c6c` / `#409eff` | 该文件的语义色 |
+正文排版取自 CSDN 博文页 `#content_views`（`.markdown_views` / `.htmledit_views`）的
+计算样式与样式表：
 
-深色侧不是站点换肤（CSDN 未公开深色 token）：保留 DSH 原有深色底 `#151517`，把品牌与
-语义色抬到深色背景上仍有对比度的同族颜色（例如品牌色 `#ff6f4d`）。
+| 元素 | CSDN 实测 |
+| --- | --- |
+| 正文 | 16px / 24px，`#4d4d4d`，段落下边距 24px |
+| h1、h2 | 22px / 32px，字重 600，`#4f4f4f`，外边距 24px 0 8px |
+| h3 / h4 / h5 / h6 | 20/30、18/28、16/26、16/24 |
+| 加粗 `strong` | 字重 700 |
+| 斜体 `em, i, cite, dfn, var` | italic |
+| 下划线 `u` | underline |
+| 删除线 `s, del` | line-through |
+| 链接 `a` | `#4ea1db`，常态无下划线；hover `#ca0c16`；visited `#6795b5` |
+| 行内代码 | `#c7254e` on `#f9f2f4`，内边距 2px 4px，圆角 2px，Source Code Pro |
+| 引用块 | 背景 `#eef0f4`，左边框 8px `#dddfe4`，内边距 16px |
+| 表格 | 单元格 1px `#dddddd`、内边距 8px、14px/22px；表头底色 `#eff3f5`、字重 700；偶数行 `#f7f7f7` |
+| 分隔线 | 1px 实线 `#cccccc`，外边距 24px 0 |
+| `kbd` | 白底、1px `rgba(63,63,63,.25)`、`0 1px 0` 阴影、圆角 4px |
+| 代码块 | 底色 `#fafafa`，圆角 5px，Source Code Pro 14px/22px |
+| 语法高亮 | Atom One Light（深色 Atom One Dark），取自 CSDN 文章实际加载的 highlight 样式 |
+
+字号没有写死：Markdown 的字号/行高按 CSDN 的比例跟随 `--dsh-content-font-size`，
+所以设置里的「字号大小」仍然有效。
+
+## 作用域
+
+Markdown 根类在构建产物里形如 `_markdown_1ypvv_5`，样式表用
+`[class*="_markdown_"]:not([class*="_compact_"])` 命中：换构建哈希仍然命中，而
+`compact` 变体（工具输出等小字号区域）不参与覆盖。代码块用 DSH 的稳定全局钩子
+`md-code-block`。
 
 ## 文件
 
 | 文件 | 作用 |
 | --- | --- |
-| `package.json` | 声明 `dsh.bundle.patch` 与 `dsh.client`，让这个包作为 bundle 被组合 |
+| `package.json` | 声明 `dsh.bundle.patch` 与 `dsh.client` |
 | `cordis.patch.yml` | 往 profile 插入一行 `csdn-theme` |
-| `index.js` | 宿主半边，空 `apply`：主题全部在客户端完成 |
-| `client.js` | 客户端半边：`window.__ModuleLoader__.load` 登记模块，在 `apply` 里叠加 token 层 |
-| `test/client.test.mjs` | 单测：模块 id、注入的服务、source 取值、每个 token 的 `{light,dark}` 形状与品牌色落点 |
+| `index.js` | 宿主半边，空 `apply` |
+| `client.js` | 调色板、字体 token、语法高亮 token、元素级样式表 |
+| `test/client.test.mjs` | 7 条单测：模块契约、token 形状与命名空间、字号轴、高亮取值、样式表注入与清理 |
 
 ## 本地验证
 
@@ -57,25 +74,23 @@ npm test
 ## 安装与卸载
 
 ```sh
-# 安装到某个 profile（路径按你本机实际情况替换）
 dsh plugin --profile web add "$(pwd)"
-
-# 确认配置层被组合出来
 dsh --profile web --dump-config | grep -n "dsh-csdn-theme"
-
-# 卸载
 dsh plugin --profile web remove dsh-csdn-theme
 ```
 
-客户端代码只在浏览器里生效：安装后需要重启宿主或刷新页面。
+客户端代码只在浏览器里生效：改动后重启宿主或刷新页面。
 
-## 想改配色
+## 想改
 
-`client.js` 里 `LIGHT` / `DARK` 两张表就是全部输入，`TOKENS` 只是把它们映射到 token 名。
-改值 → `npm test` → 重新安装。
+- 颜色：`client.js` 顶部的 `LIGHT` / `DARK` 两张表。
+- 排版比例与字重：`TOKENS` 里的 `--dsw-font-markdown-*`。
+- 元素级规则：`client.js` 里的 `RULES` 与 `CODE_BLOCK_RULES`。
+
+改完 `npm test`，再重启宿主。
 
 ## 已知边界
 
-- 只覆盖 token，不改变布局、间距与字体（字体是 `--dsw-font-*` 系列，本插件不动）。
-- 不提供设置面板：想要「CSDN / 默认」来回切，用插件启用状态，或另写一个注册整套主题的插件。
-- 覆盖值写在 `document.body` 的行内自定义属性上，优先级高于样式表，因此亮暗两种配色下都取本插件的值。
+- 只做视觉覆盖，不改 DOM、不注册设置项；开关就是启用/停用这个插件。
+- `compact` 变体不覆盖，避免影响工具输出这类小字号区域。
+- 深色侧不是 CSDN 官方换肤（站点未公开深色 token），是按同一套语义调出的深色值。

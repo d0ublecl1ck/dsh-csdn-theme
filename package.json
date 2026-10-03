@@ -1,10 +1,10 @@
 {
   "name": "dsh-csdn-theme",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "CSDN 风格的 DSH Web 主题：把 CSDN 品牌色 #fc5531 及其文字/边框/代码色阶以主题 token 覆盖层接入，浅色与深色各一套。",
+  "description": "CSDN 风格的 DSH Web 主题：CSDN 品牌色与博文正文排版（加粗/下划线/引用/表格/代码等）双层接入，浅色与深色各一套。",
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",

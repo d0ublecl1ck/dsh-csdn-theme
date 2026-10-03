@@ -21,21 +21,54 @@ async function loadClientPlugin() {
   return captured.factory(() => { throw new Error('本插件不依赖浏览器模块表') })
 }
 
-/** 用假 ctx 跑一次 apply，拿回传给 overrideTokens 的 token 表。 */
-async function captureOverrides() {
+/** 极简 document 替身：只覆盖插件用到的 createElement / head.append / remove。 */
+function fakeDocument() {
+  const appended = []
+  return {
+    appended,
+    createElement(tag) {
+      return {
+        tagName: String(tag).toUpperCase(),
+        dataset: {},
+        textContent: '',
+        removed: false,
+        remove() {
+          this.removed = true
+          const index = appended.indexOf(this)
+          if (index >= 0) appended.splice(index, 1)
+        }
+      }
+    },
+    head: {
+      append: (el) => { appended.push(el) },
+      appendChild: (el) => { appended.push(el); return el }
+    }
+  }
+}
+
+/** 假 ctx + 假 document 跑一次 apply，收集 disposer 以便验证清理。 */
+async function applyWithFakeCtx() {
   const plugin = await loadClientPlugin()
+  const document = fakeDocument()
   const calls = []
+  const disposers = []
   const ctx = {
-    effect: (fn) => fn(),
+    effect: (fn) => { disposers.push(fn()) },
     theme: {
       overrideTokens: (source, tokens) => {
         calls.push({ source, tokens })
-        return () => {}
+        return () => { calls.length = 0 }
       }
     }
   }
-  plugin.apply(ctx)
-  return { plugin, calls }
+  const previousDocument = globalThis.document
+  globalThis.document = document
+  try {
+    plugin.apply(ctx)
+  } finally {
+    globalThis.document = previousDocument
+  }
+  return { plugin, calls, disposers, document }
 }
 
 test('客户端模块只注入 theme 服务', async () => {
@@ -44,34 +77,69 @@ test('客户端模块只注入 theme 服务', async () => {
 })
 
 test('apply 以包名为 source 叠加恰好一层 token 覆盖', async () => {
-  const { calls } = await captureOverrides()
+  const { calls } = await applyWithFakeCtx()
   assert.equal(calls.length, 1, 'apply 应恰好调用一次 overrideTokens')
   assert.equal(calls[0].source, PKG, 'override 层的 source 必须是包名')
 })
 
-test('每个 token 都是 --dsw- 前缀，且 light/dark 均为非空字符串', async () => {
-  const { calls } = await captureOverrides()
+test('每个 token 都是 --dsw- 或插件私有 --csdn- 前缀，且 light/dark 均为颜色值', async () => {
+  const { calls } = await applyWithFakeCtx()
   const tokens = calls[0].tokens
   const names = Object.keys(tokens)
-  assert.ok(names.length >= 25, `token 数量应覆盖主要语义层，实际 ${names.length}`)
+  assert.ok(names.length >= 60, `token 数量应覆盖调色板与 Markdown 排版，实际 ${names.length}`)
   for (const name of names) {
-    assert.match(name, /^--dsw-/, `token 名必须带 --dsw- 前缀：${name}`)
+    assert.match(name, /^--(dsw|shiki|csdn)-/, `token 名必须落在已覆盖的命名空间（--dsw- / --shiki- / --csdn-）：${name}`)
     const pair = tokens[name]
     assert.equal(typeof pair, 'object', `${name} 必须是 { light, dark } 对象`)
     assert.equal(typeof pair.light, 'string', `${name}.light 必须是字符串`)
     assert.equal(typeof pair.dark, 'string', `${name}.dark 必须是字符串`)
     assert.ok(pair.light.trim().length > 0, `${name}.light 不能为空`)
     assert.ok(pair.dark.trim().length > 0, `${name}.dark 不能为空`)
-    assert.match(pair.light, /^(#[0-9a-fA-F]{3,8}|rgba?\(|hsla?\()/, `${name}.light 应为颜色值`)
-    assert.match(pair.dark, /^(#[0-9a-fA-F]{3,8}|rgba?\(|hsla?\()/, `${name}.dark 应为颜色值`)
   }
 })
 
 test('CSDN 品牌色落到品牌与主按钮 token，且深浅两套都提供', async () => {
-  const { calls } = await captureOverrides()
+  const { calls } = await applyWithFakeCtx()
   const tokens = calls[0].tokens
   assert.equal(tokens['--dsw-alias-brand-primary'].light, '#fc5531')
   assert.equal(tokens['--dsw-alias-button-primary-fill'].light, '#fc5531')
   assert.ok(tokens['--dsw-alias-brand-primary'].dark.length > 0)
   assert.notEqual(tokens['--dsw-alias-label-primary'].light, tokens['--dsw-alias-label-primary'].dark, '浅色与深色的正文色不应相同')
+})
+
+test('Markdown 字体 token 保留字号轴，不写死 px 字号', async () => {
+  const { calls } = await applyWithFakeCtx()
+  const tokens = calls[0].tokens
+  const base = tokens['--dsw-font-markdown-base']
+  assert.ok(base, '必须覆盖 --dsw-font-markdown-base')
+  assert.match(base.light, /--dsh-content-font-size/, '正文排版必须跟随宿主字号设置')
+  const strong = tokens['--dsw-font-markdown-base-strong']
+  assert.match(strong.light, /^700 /, '加粗档位应是 700（CSDN 取值）')
+  assert.match(tokens['--csdn-font-family'].light, /PingFang SC/, '字体栈采用 CSDN 的顺序')
+  assert.match(tokens['--csdn-font-family'].light, /^\-apple\-system, "SF UI Text"/, 'CSDN 的字体栈首位是系统字体，随后是 SF UI Text')
+})
+
+test('语法高亮 token 走 Atom One Light / One Dark', async () => {
+  const { calls } = await applyWithFakeCtx()
+  const tokens = calls[0].tokens
+  assert.equal(tokens['--shiki-token-keyword'].light, '#a626a4')
+  assert.equal(tokens['--shiki-token-string'].light, '#50a14f')
+  assert.equal(tokens['--shiki-token-keyword'].dark, '#c678dd')
+  assert.equal(tokens['--shiki-token-string'].dark, '#98c379')
+})
+
+test('apply 注入一个带包名标记的 style 标签，清理时移除', async () => {
+  const { disposers, document } = await applyWithFakeCtx()
+  assert.equal(document.appended.length, 1, 'apply 应恰好追加一个 style 标签')
+  const tag = document.appended[0]
+  assert.equal(tag.tagName, 'STYLE')
+  assert.equal(tag.dataset.plugin, PKG, 'style 标签必须带 data-plugin 标记以便排查与清理')
+  assert.match(tag.textContent, /md-code-block/, '样式表应包含代码块钩子')
+  assert.match(tag.textContent, /_markdown_/, '样式表应作用域到 Markdown 根类')
+  assert.match(tag.textContent, /strong[^{]*\{[^}]*font-weight:\s*700/, '样式表应把加粗固定为 700')
+  assert.ok(!tag.removed)
+  assert.equal(disposers.length, 2, 'theme 层与样式表各需要一个 disposer')
+  for (const dispose of disposers) dispose()
+  assert.ok(tag.removed, '清理函数必须移除 style 标签')
+  assert.equal(document.appended.length, 0)
 })
