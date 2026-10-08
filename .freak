@@ -1,6 +1,5 @@
 # FREAK
 
-- [ ] npm 包页的 README 图片是裂的：`README.md` 引用 `assets/screenshot-*.png`，但 `package.json` 的 `files` 白名单只有 index/client/patch/README —— 下次改包清单时决定是把 `assets` 加进 `files`，还是 README 改用 GitHub raw 外链。记录：2026-10-08
 - [ ] tooltip 快捷键徽标（`kbd`）底色由 `--dsw-alias-tooltip-bg` 经 color-mix 提亮派生，前提是宿主把按键字形固定成白色 —— 宿主改键位配色或改这两个 token 名后需重新核对。记录：2026-10-08
 
 - [ ] `client.js` 的 Markdown 样式表作用域 `[class*="_markdown_"]` — 依赖宿主的 CSS Modules 命名形如 `_<local>_<hash>_<line>`。宿主换构建配置后可能失配；下次核对时直接查宿主前端构建产物里 `.markdown` 编译出的类名。记录：2026-10-03

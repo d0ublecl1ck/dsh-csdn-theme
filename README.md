@@ -7,9 +7,9 @@
 [![stars](https://img.shields.io/github/stars/d0ublecl1ck/dsh-csdn-theme?style=flat)](https://github.com/d0ublecl1ck/dsh-csdn-theme)
 ![dsh](https://img.shields.io/badge/dsh-0.1.7--rc.2-6f42c1)
 
-![浅色下的 CSDN 正文排版](assets/screenshot-light.png)
+![浅色下的 CSDN 正文排版](https://raw.githubusercontent.com/d0ublecl1ck/dsh-csdn-theme/main/assets/screenshot-light.png)
 
-![深色下的同一份正文](assets/screenshot-dark.png)
+![深色下的同一份正文](https://raw.githubusercontent.com/d0ublecl1ck/dsh-csdn-theme/main/assets/screenshot-dark.png)
 
 两张图是在 DSH Desktop 里用本主题渲染的真实截图（同一段 Markdown，只切换了宿主的浅色/深色偏好）。
 

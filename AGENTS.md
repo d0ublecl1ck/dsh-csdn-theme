@@ -29,6 +29,7 @@ dsh plugin --profile web remove dsh-csdn-theme
 - token 命名空间：宿主语义层 `--dsw-`，语法高亮 `--shiki-`，本插件私有 `--csdn-`。
 - 字号不写死 px，一律按比例挂在 `--dsh-content-font-size` 上，保留宿主字号设置。
 - 样式表作用域 `[class*="_markdown_"]:not([class*="_compact_"])`；代码块用宿主全局钩子 `md-code-block`。
+- README 的截图用 GitHub raw 外链，因为 npm 的 `files` 白名单不含 `assets/`，相对路径在 npm 包页会裂；`screenshots.json`（市场详情页）仍用仓库内相对路径。
 - 视觉取值都要有来源：颜色取自 CSDN 线上样式表，排版取自博文页的计算样式或样式表，不凭印象写。
 
 ## 发布到 npm
