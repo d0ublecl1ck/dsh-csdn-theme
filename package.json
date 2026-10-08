@@ -1,6 +1,6 @@
 {
   "name": "dsh-csdn-theme",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
   "license": "MIT",
   "description": "CSDN 风格的 DSH Web 主题：CSDN 品牌色与博文正文排版（加粗/下划线/引用/表格/代码等）双层接入，浅色与深色各一套。",
