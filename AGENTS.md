@@ -45,10 +45,11 @@ npm publish          # 发新版前先改 package.json 里的 version
 
 ## 当前状态与下一步
 
-- 单测 7/7；五道门（manifest / shape / install / compose / activate）全过；样式表在真实浏览器中 36/36 规则解析通过。
+- 单测 8/8；五道门（manifest / shape / install / compose / activate）全过；样式表在真实浏览器中 36/36 规则解析通过。
 - 已在 DSH Desktop（dsh `0.1.7-rc.2`）实测两层都生效：`body` 上有 token 内联覆盖，DOM 里有 `<style data-plugin="dsh-csdn-theme">`；浅色品牌色 `#fc5531`、深色 `#ff6f4d`。真实截图在 `assets/`，重录方式见 `scripts/capture-screenshots.mjs` 头部注释。
 - 已发布 npm：`dsh-csdn-theme@0.2.0`（2026-10-03），`repository` 指回本仓库，目录侧的 npm 映射会自动关联，无需手动申报。
 - 已公开：`github.com/d0ublecl1ck/dsh-csdn-theme`；市场收录已提 PR（`awesome-dsh-plugin/awesome-dsh-plugin#6474`，`category: theme`），等对方 CI 的仓库年龄门自动放行，无需重提。
+- 悬浮 tooltip 的快捷键徽标底色已改为由 `--dsw-alias-tooltip-bg` 提亮派生（2026-10-08 实测修复）：白色键位字形的对比度浅色 8.83:1、深色 7.52:1，旧值 `#f0f0f5` 只有 1.14:1。
 - `u` / `kbd` 规则在 DSH 对话里不会触发——DSH 的 Markdown 渲染器转义原始 HTML；保留是为了其他会产出真实元素的场景。
 - 未覆盖：`<mark>`、任务列表复选框、KaTeX；h5/h6 没有独立 token，只对齐了外边距。
 - 未验证：早于 0.1.7 的 DSH 版本。

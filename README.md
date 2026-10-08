@@ -34,6 +34,7 @@
 | 正文排版 | 正文 16/24、h1–h6 的字重与行高、加粗/斜体/下划线/删除线、段落间距 |
 | 块级元素 | 引用块、表格（网格 / 表头底色 / 斑马纹）、分隔线、图片与图注、定义列表 |
 | 代码 | 行内代码 `#c7254e` on `#f9f2f4`、代码块圆角与底色、Atom One Light / Dark 语法高亮 |
+| 外壳提示 | 悬浮 tooltip 的底色，以及其中快捷键徽标（`kbd`）的底色：徽标底色由 tooltip 底色提亮而来，保证宿主固定的白色按键字形看得清 |
 
 ## 快速开始
 
@@ -113,6 +114,7 @@ dsh plugin --profile web remove dsh-csdn-theme
 - `compact` 变体（工具输出等小字号区域）不覆盖，避免影响可读性。
 - 深色侧不是 CSDN 官方换肤（站点未公开深色 token），是按同一套语义调出的深色值。
 - h5/h6 在 DSH 里没有独立的 `--dsw-font-markdown-*` token：本插件只对齐了它们的外边距与颜色。
+- 悬浮 tooltip 里的快捷键徽标（`kbd`）字形由宿主固定为白色，底色必须由 `--dsw-alias-tooltip-bg` 提亮派生；宿主换配色或换 token 名后需要重新核对。
 - `u` 与 `kbd` 规则针对真实 `<u>` / `<kbd>` 元素。DSH 的 Markdown 渲染器会转义原始 HTML，所以对话正文里这两条通常不会触发，保留是为了其他会产出真实元素的场景。
 - 尚未验证：DSH 早于 0.1.7 的版本；样式表作用域依赖宿主 CSS Module 的 `_markdown_<hash>` 命名。
 
@@ -131,7 +133,7 @@ Markdown 根类在构建产物里形如 `_markdown_1ypvv_5`，样式表用 `[cla
 | `screenshots.json` | 声明市场详情页要展示的截图 |
 | `assets/` | 上面两张真实截图 |
 | `scripts/capture-screenshots.mjs` | 重录那两张截图的完整链路 |
-| `test/client.test.mjs` | 7 条单测：模块契约、token 形状与命名空间、字号轴、高亮取值、样式表注入与清理 |
+| `test/client.test.mjs` | 8 条单测：模块契约、token 形状与命名空间、字号轴、高亮取值、样式表注入与清理、tooltip 快捷键徽标对比度 |
 
 ## 本地验证
 

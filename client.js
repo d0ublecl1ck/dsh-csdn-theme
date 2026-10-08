@@ -131,7 +131,9 @@ window.__ModuleLoader__.load({
       '--dsw-alias-settings-card-fill': pair(LIGHT.surface, DARK.surface),
       '--dsw-alias-settings-card-stroke': pair(LIGHT.line, DARK.line),
       '--dsw-alias-tooltip-bg': pair('#222226', '#2f2f36'),
-      '--dsw-alias-tooltip-key-bg': pair(LIGHT.lineSoft, DARK.lineSoft),
+      // 快捷键徽标（tooltip 里的 kbd）字形固定为白色，底色必须由 tooltip 底色提亮而来。
+      // 宿主默认就是 color-mix(var(--dsw-alias-tooltip-bg), white 18%)；早先复用面板浅底会让白字压浅底看不清。
+      '--dsw-alias-tooltip-key-bg': both('color-mix(in srgb, var(--dsw-alias-tooltip-bg), white 18%)'),
       '--dsw-alias-toast-bg': pair('#222226', '#2f2f36'),
       '--dsw-alias-toast-label': pair('#ffffff', '#f5f5f7'),
 

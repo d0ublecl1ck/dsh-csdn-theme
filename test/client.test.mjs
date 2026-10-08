@@ -143,3 +143,70 @@ test('apply 注入一个带包名标记的 style 标签，清理时移除', asyn
   assert.ok(tag.removed, '清理函数必须移除 style 标签')
   assert.equal(document.appended.length, 0)
 })
+
+/* ---------- 验收回归：hover 快捷键提示（tooltip 里的 kbd 徽标） ---------- */
+
+/** 解析 #rgb / #rrggbb。 */
+function parseHex(value) {
+  const hex = value.trim().replace(/^#/u, '')
+  const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex
+  assert.match(full, /^[0-9a-fA-F]{6}$/u, `无法解析的颜色：${value}`)
+  return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16))
+}
+
+/**
+ * 解析主题 token 值，覆盖本插件用到的两种写法：
+ *   #rrggbb / #rgb
+ *   color-mix(in srgb, <颜色|var(--token)>, white <n>%)
+ * 宿主自己就是用 color-mix(in srgb, var(--dsw-alias-tooltip-bg), white 18%) 定义徽标底色的。
+ */
+function resolveColor(value, tokens, theme, depth = 0) {
+  const text = value.trim()
+  if (/^#[0-9a-fA-F]{3,6}$/u.test(text)) return parseHex(text)
+  const mix = text.match(/^color-mix\(\s*in srgb\s*,\s*(.+?)\s*,\s*white\s+([\d.]+)%\s*\)$/u)
+  if (mix === null) return null
+  const source = /^var\(/u.test(mix[1]) ? tokens[mix[1].slice(4, -1)] : null
+  const from = resolveColor(source ? source[theme] : mix[1], tokens, theme, depth + 1)
+  if (from === null || depth > 4) return null
+  const ratio = Number(mix[2]) / 100
+  return from.map((channel) => Math.round(channel * (1 - ratio) + 255 * ratio))
+}
+
+/** WCAG 相对亮度。 */
+function luminance(rgb) {
+  const [r, g, b] = rgb.map((channel) => {
+    const c = channel / 255
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/** WCAG 对比度。 */
+function contrast(a, b) {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+
+const WHITE = [255, 255, 255]
+
+test('tooltip 快捷键徽标底色由 tooltip 底色提亮而来，白字对比度达标', async () => {
+  const { calls } = await applyWithFakeCtx()
+  const tokens = calls[0].tokens
+  const keyBg = tokens['--dsw-alias-tooltip-key-bg']
+  assert.ok(keyBg, '必须覆盖 --dsw-alias-tooltip-key-bg，host 用它画快捷键徽标底色')
+  assert.notEqual(keyBg.light, tokens['--dsw-alias-bg-layer-3'].light, '徽标底色不能复用面板浅底')
+
+  for (const theme of ['light', 'dark']) {
+    const resolved = resolveColor(keyBg[theme], tokens, theme)
+    assert.ok(resolved !== null, `${theme} 的徽标底色必须是可解析的颜色：${keyBg[theme]}`)
+    const ratio = contrast(resolved, WHITE)
+    assert.ok(
+      ratio >= 4.5,
+      `${theme} 下 ${keyBg[theme]} 与白色按键字形对比度只有 ${ratio.toFixed(2)}:1，会看不清`
+    )
+  }
+
+  // 负向断言：修复前的浅底 #f0f0f5 确实不达标 —— 证明这条检查能抓住本缺陷。
+  assert.ok(contrast(parseHex('#f0f0f5'), WHITE) < 4.5, '旧值必须被判为不合格，否则该检查形同虚设')
+})
+

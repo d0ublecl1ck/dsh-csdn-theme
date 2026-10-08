@@ -1,5 +1,7 @@
 # FREAK
 
+- [ ] tooltip 快捷键徽标（`kbd`）底色由 `--dsw-alias-tooltip-bg` 经 color-mix 提亮派生，前提是宿主把按键字形固定成白色 —— 宿主改键位配色或改这两个 token 名后需重新核对。记录：2026-10-08
+
 - [ ] `client.js` 的 Markdown 样式表作用域 `[class*="_markdown_"]` — 依赖宿主的 CSS Modules 命名形如 `_<local>_<hash>_<line>`。宿主换构建配置后可能失配；下次核对时直接查宿主前端构建产物里 `.markdown` 编译出的类名。记录：2026-10-03
 - [ ] `client.js` 里的 `md-code-block` — 这是宿主提供的全局钩子，不属于本仓库。宿主升级后确认它仍在，否则代码块圆角与底色会失效。记录：2026-10-03
 - [ ] 排版比例全部挂在 `--dsh-content-font-size` 上 — 宿主若改名，字号会退回固定值；下次核对时检查该变量是否仍由宿主写入 `body`。记录：2026-10-03
